@@ -10,9 +10,24 @@ matching user variables.
 
 ### Initial deploy and test 
 
-The application can be deployed and run in an independent IntegrationServer or using a node-associated 
-server, and the two flows should start automatically. The timer-based flow is most useful for 
-independent servers, as it prints the user variable values to the console using a trace node:
+Once this repo has been cloned locally (either using the toolkit or command line), the application
+can be deployed and run in an independent IntegrationServer or using a node-associated server, and 
+the two flows should start automatically. 
+
+For an independent server, a work directory can be created and the existing BAR file deployed:
+```
+tdolby@IBM-PF3K066L:~/github.com/ace-user-variable-examples$ mqsicreateworkdir ~/tmp/ace-user-variable-examples-work-dir
+mqsicreateworkdir: Copying sample server.config.yaml to work directory
+1 file(s) copied.
+Successful command completion.
+tdolby@IBM-PF3K066L:~/github.com/ace-user-variable-examples$ mqsibar -c -w ~/tmp/ace-user-variable-examples-work-dir -a ESQLApplication/ESQLApplication.bar
+Generating runtime objects: '/home/tdolby/tmp/ace-user-variable-examples-work-dir/run' ...
+
+BIP8071I: Successful command completion.
+```
+
+The timer-based flow is most useful for independent servers, as it prints the user variable values to 
+the console using a trace node:
 
 ```
 tdolby@IBM-PF3K066L:/$ IntegrationServer -w ~/tmp/ace-user-variable-examples-work-dir
