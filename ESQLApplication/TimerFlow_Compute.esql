@@ -1,0 +1,13 @@
+DECLARE firstUserVariable EXTERNAL CHARACTER 'defaultValue';
+DECLARE secondUserVariable EXTERNAL CHARACTER 'defaultValue';
+
+CREATE COMPUTE MODULE Flow_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot.Properties = InputProperties;
+		SET OutputRoot.JSON.Data.firstUserVariable = firstUserVariable;
+		SET OutputRoot.JSON.Data.secondUserVariable = secondUserVariable;
+		RETURN TRUE;
+	END;
+
+END MODULE;

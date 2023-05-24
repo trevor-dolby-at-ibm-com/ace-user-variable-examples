@@ -1,0 +1,5 @@
+---
+UserVariables:
+  firstUserVariable: 'valueFromServerConfYaml'
+  secondUserVariable: 'valueFromSECOND_USER_VARIABLE:${SECOND_USER_VARIABLE}'
+resolveUserVariableEnvVars: true
