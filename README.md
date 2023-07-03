@@ -14,6 +14,16 @@ Once this repo has been cloned locally (either using the toolkit or command line
 can be deployed and run in an independent IntegrationServer or using a node-associated server, and 
 the two flows should start automatically. 
 
+The values shown are the default values specified in the [ESQL code](ESQLApplication/Flow_Compute.esql) 
+which declares the variables with a default value to avoid failures on startup:
+```
+DECLARE firstUserVariable EXTERNAL CHARACTER 'defaultValue';
+DECLARE secondUserVariable EXTERNAL CHARACTER 'defaultValue';
+```
+The default is not required, but if it is not present and no value is specified by some other means 
+then the application will not start. The values can be changed via server.conf.yaml, the command line,
+and environment variables; see below for details.
+
 For an independent server, a work directory can be created and the existing BAR file deployed:
 ```
 tdolby@IBM-PF3K066L:~/github.com/ace-user-variable-examples$ mqsicreateworkdir ~/tmp/ace-user-variable-examples-work-dir
@@ -45,10 +55,10 @@ Started native listener for HTTP input node on port 7800 for URL /ESQLApplicatio
 2023-05-24 09:00:29.883494: BIP2269I: Deployed resource 'TimerFlow' (uuid='TimerFlow',type='MessageFlow') started successfully.
 2023-05-24 09:00:29.883624: BIP9332I: Application 'ESQLApplication' has been reloaded successfully.
 2023-05-24 09:00:29.884332: BIP3051E: Error message 'Root.JSON:
-( ['json' : 0x7f4e8005b650]
+( ['json' : 0x248286a6d10]
   (0x01000000:Object):Data = (
-    (0x03000000:NameValue):firstUserVariable  = 'valueFromServerConfYaml' (CHARACTER)
-    (0x03000000:NameValue):secondUserVariable = 'valueFromSECOND_USER_VARIABLE:' (CHARACTER)
+    (0x03000000:NameValue):firstUserVariable  = 'defaultValue' (CHARACTER)
+    (0x03000000:NameValue):secondUserVariable = 'defaultValue' (CHARACTER)
   )
 )
 ' from trace node 'TimerFlow.Trace'.
@@ -60,10 +70,10 @@ Started native listener for HTTP input node on port 7800 for URL /ESQLApplicatio
 The HTTP-based flow returns the user variable values as an HTTP reply:
 ```
 tdolby@IBM-PF3K066L:/$ curl http://localhost:7800/ESQLApplication
-{"firstUserVariable":"valueFromServerConfYaml","secondUserVariable":"valueFromSECOND_USER_VARIABLE:"}
+{"firstUserVariable":"defaultValue","secondUserVariable":"defaultValue"}
 ```
 
-### Updating the user variables
+### Setting the user variables
 
 The user variables can be changed from the independent server command line
 ```
@@ -77,14 +87,26 @@ UserVariables:
 ```
 The file [ESQLApplication/example-overrides-server.conf.yaml](ESQLApplication/example-overrides-server.conf.yaml) can
 be copied into the server work directory as `overrides/server.conf.yaml` as a starting point. The example also
-reads an environment variable as part of setting `secondUserVariable` to allow further configurability.
-
-### Other notes
-
-The [ESQL code](ESQLApplication/Flow_Compute.esql) declares the variables with a default value to 
-avoid failures on startup:
+reads an environment variable as part of setting `secondUserVariable` to allow further configurability:
 ```
-DECLARE firstUserVariable EXTERNAL CHARACTER 'defaultValue';
-DECLARE secondUserVariable EXTERNAL CHARACTER 'defaultValue';
+---
+UserVariables:
+  firstUserVariable: 'valueFromServerConfYaml'
+  secondUserVariable: 'valueFromSECOND_USER_VARIABLE:${SECOND_USER_VARIABLE}'
+resolveUserVariableEnvVars: true
 ```
-The default is not required, but if it not present then the application will not start.
+Note that the `resolveUserVariableEnvVars` is required for the environment variable substitution to be enabled, and
+that the `${VAR}` syntax is used even on Windows; `%VAR%` does not work.
+
+The server.conf.yaml overrides produce the following output by default
+```
+2023-05-24 09:00:29.884332: BIP3051E: Error message 'Root.JSON:
+( ['json' : 0x7f4e8005b650]
+  (0x01000000:Object):Data = (
+    (0x03000000:NameValue):firstUserVariable  = 'valueFromServerConfYaml' (CHARACTER)
+    (0x03000000:NameValue):secondUserVariable = 'valueFromSECOND_USER_VARIABLE:' (CHARACTER)
+  )
+)
+```
+and this can be modified by setting the environment variable `SECOND_USER_VARIABLE`: the value
+of that variable is appended to the existing string for secondUserVariable.
